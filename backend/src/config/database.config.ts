@@ -11,3 +11,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
     entities: [User],
     synchronize: true, // Auto-sync entity changes with DB (turn off in production)
 };
+
+
+
+
