@@ -17,10 +17,20 @@ export class BookService {
     }
 
     // Get all books
-    async findAll(): Promise<Book[]> {
-        return this.bookRepository.find();
+    async findAll(page: number = 1, limit: number = 10, search?: string): Promise<Book[]> {
+        const query = this.bookRepository.createQueryBuilder('book');
+    
+        if (search) {
+            query.where('book.title LIKE :search OR book.author LIKE :search', {
+                search: `%${search}%`,
+            });
+        }
+    
+        query.skip((page - 1) * limit).take(limit);
+    
+        return await query.getMany();
     }
-
+    
     // Get a book by ID
     async findOne(id: number): Promise<Book | null> {
         return this.bookRepository.findOneBy({ id });
@@ -37,3 +47,5 @@ export class BookService {
         await this.bookRepository.delete(id);
     }
 }
+
+
