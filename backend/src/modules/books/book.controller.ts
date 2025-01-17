@@ -24,7 +24,10 @@ export class BookController {
         return this.bookService.create(bookData);
     }
 
-    @Post('upload')
+    @Post('upload/:id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Role('admin')
+    @Post('upload/:id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @UseInterceptors(FileInterceptor('file', {
@@ -33,12 +36,13 @@ export class BookController {
             filename: (req, file, callback) => {
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
                 const ext = extname(file.originalname);
-                callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+                callback(null, `book-${req.params.id}-${uniqueSuffix}${ext}`);
             },
         }),
     }))
-    async uploadBookCover(@UploadedFile() file: Express.Multer.File) {
-        return { filePath: `/uploads/${file.filename}` };
+    async uploadBookCover(@Param('id') id: number, @UploadedFile() file: Express.Multer.File) {
+        await this.bookService.update(id, { coverImage: `/uploads/${file.filename}` });
+        return { filePath: `/uploads/${file.filename}`, message: 'Cover image uploaded successfully.' };
     }
 
     @Get()
@@ -69,3 +73,6 @@ export class BookController {
         return this.bookService.remove(id);
     }
 }
+
+
+

@@ -30,9 +30,14 @@ export class AuthService {
     async login(userData: any) {
         const user = await this.userRepository.findOneBy({ email: userData.email });
         if (user && await bcrypt.compare(userData.password, user.password)) {
-            const payload = { userId: user.id, email: user.email };
+            const payload = { userId: user.id, email: user.email, role: user.role};
             const token = this.jwtService.sign(payload);
-            return { accessToken: token };
+            return {
+            accessToken: this.jwtService.sign(payload, {
+                secret: process.env.JWT_SECRET,  // ✅ This must match JwtStrategy
+                expiresIn: process.env.JWT_EXPIRES_IN,
+            }),
+        };
         }
         return { message: 'Invalid credentials' };
     }
