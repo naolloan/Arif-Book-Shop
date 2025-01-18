@@ -5,6 +5,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { databaseConfig } from './config/database.config'; // Adjust path if needed
 import { BookModule } from './modules/books/book.module';
 import { Book } from './modules/books/book.entity';
+import { CartModule } from './modules/cart/cart.module';
+import { UserModule } from './modules/users/user.module';
 
 @Module({
   imports: [
@@ -12,7 +14,8 @@ import { Book } from './modules/books/book.entity';
     ConfigModule.forRoot({ isGlobal: true }),  // ✅ Load .env globally
     AuthModule,
     BookModule,
+    CartModule,
+    UserModule,
   ],
 })
 export class AppModule {}
-

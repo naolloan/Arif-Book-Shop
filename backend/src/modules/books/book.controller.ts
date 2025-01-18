@@ -1,6 +1,7 @@
 import { 
     Controller, Get, Post, Put, Delete, Param, Body, ValidationPipe, 
-    UsePipes, UseGuards, UploadedFile, UseInterceptors, Query 
+    UsePipes, UseGuards, UploadedFile, UseInterceptors, Query, 
+    BadRequestException
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -41,6 +42,10 @@ export class BookController {
         }),
     }))
     async uploadBookCover(@Param('id') id: number, @UploadedFile() file: Express.Multer.File) {
+        if (!file) {
+            throw new BadRequestException('No file uploaded');
+        }
+        console.log('Uploaded File:', file);
         await this.bookService.update(id, { coverImage: `/uploads/${file.filename}` });
         return { filePath: `/uploads/${file.filename}`, message: 'Cover image uploaded successfully.' };
     }

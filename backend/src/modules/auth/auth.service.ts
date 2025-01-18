@@ -21,6 +21,7 @@ export class AuthService {
             username: userData.username,
             email: userData.email,
             password: hashedPassword,
+            role: userData.role || 'user',
         });
 
         await this.userRepository.save(newUser);
