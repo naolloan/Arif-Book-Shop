@@ -69,14 +69,6 @@ export class OrderService {
         return this.orderRepository.save(order);
     }
 
-    async getUserOrders(userId: number) {
-        return this.orderRepository.find({
-            where: { user: { id: userId } },
-            relations: ['user'],
-            order: { createdAt: 'DESC' },
-        });
-    }
-
     async checkout(userId: number): Promise<Order> {
         // Fetch the user
         const user = await this.userRepository.findOneBy({ id: userId });
@@ -110,6 +102,27 @@ export class OrderService {
         await this.orderRepository.save(order);
         await this.cartService.clearCart(user); // Pass the user object
 
-        return order;
+        return order; 
     }
+
+    async getUserOrders(userId: number): Promise<Order[]> {
+        return this.orderRepository.find({
+            where: { user: { id: userId } },
+            relations: ['items', 'items.book'],
+            order: { createdAt: 'DESC' },
+        });
+    }
+
+    async getOrderById(userId: number, orderId: number): Promise<Order | null> {
+        const order = await this.orderRepository.findOne({
+            where: { id: orderId, user: { id: userId } },
+            relations: ['items', 'items.book'],
+        });
+    
+        if (!order) {
+            throw new Error(`Order with ID ${orderId} not found`);
+        }
+    
+        return order;
+    }    
 }

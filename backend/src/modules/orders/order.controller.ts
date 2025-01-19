@@ -5,6 +5,7 @@ import { RolesGuard } from '../../common/roles.guard';
 import { Role } from '../../common/roles.decorator';
 import { User } from '../users/user.entity';
 import { RequestWithUser } from '../../common/interfaces/request-with-user.interface';
+import { Order } from './order.entity';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
@@ -39,5 +40,19 @@ export class OrderController {
     async checkout(@Req() request: RequestWithUser) {
         const userId = request.user.userId;
         return this.orderService.checkout(userId);
+    }
+
+    @Get('history')
+    @UseGuards(JwtAuthGuard)
+    async getOrderHistory(@Req() request: RequestWithUser): Promise<Order[]> {
+        const userId = request.user.userId;
+        return this.orderService.getUserOrders(userId);
+    }
+
+    @Get(':id')
+    @UseGuards(JwtAuthGuard)
+    async getOrderDetails(@Req() request: RequestWithUser, @Param('id') orderId: number): Promise<Order | null> {
+        const userId = request.user.userId;
+        return this.orderService.getOrderById(userId, orderId);
     }
 }

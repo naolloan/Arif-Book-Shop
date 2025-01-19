@@ -49,7 +49,7 @@ export class BookService {
 
     async searchAndFilterBooks(
         search?: string,
-        genre?: string | string[], // Accept single or multiple genres
+        genre?: string | string[],
         minPrice?: number,
         maxPrice?: number,
         sortBy?: string,
@@ -63,30 +63,12 @@ export class BookService {
             });
         }
     
-        // Validate genres
         if (genre) {
             if (!Array.isArray(genre)) {
-                genre = [genre]; // Convert single genre to array
+                genre = [genre];
             }
-    
-            // Fetch available genres from the database
-            const availableGenres = await this.bookRepository
-                .createQueryBuilder('book')
-                .select('DISTINCT book.genre', 'genre')
-                .getRawMany();
-    
-            const validGenres = availableGenres.map(g => g.genre.toLowerCase());
-    
-            // Check if any provided genre is invalid
-            const invalidGenres = genre.filter(g => !validGenres.includes(g.toLowerCase()));
-    
-            if (invalidGenres.length > 0) {
-                throw new Error(
-                    `Invalid genre(s) provided: ${invalidGenres.join(', ')}. Available genres: ${validGenres.join(', ')}`
-                );
-            }
-    
-            // Filter by valid genres
+
+            console.log('Genres to match:', genre.map(g => g.toLowerCase()));
             query.andWhere('LOWER(book.genre) IN (:...genres)', {
                 genres: genre.map(g => g.toLowerCase()),
             });
@@ -103,7 +85,13 @@ export class BookService {
         if (sortBy) {
             query.orderBy(`book.${sortBy}`, order);
         }
-    
-        return query.getMany();
-    }    
+
+        const books = await query.getMany();
+
+        if (books.length === 0) {
+            console.warn('No books found matching the query.');
+        }
+
+        return books;
+    }
 }

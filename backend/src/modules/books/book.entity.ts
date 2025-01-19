@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Review } from '../reviews/review.entity';
 
 @Entity('books')
 export class Book {
@@ -22,4 +23,11 @@ export class Book {
 
     @Column({ nullable: true })
     coverImage!: string;  // URL or filename for the book cover
+
+    @OneToMany(() => Review, (review) => review.book)
+    reviews!: Review[];
 }
+
+
+
+
