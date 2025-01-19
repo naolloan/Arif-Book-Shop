@@ -39,4 +39,17 @@ export class CartService {
     async clearCart(user: User) {
         return this.cartRepository.delete({ user });
     }
+
+    // Add a method to calculate the total price of the cart
+    async calculateTotalPrice(userId: number): Promise<number> {
+        const cartItems = await this.cartRepository.find({
+            where: { user: { id: userId } },
+            relations: ['book'],
+        });
+
+        return cartItems.reduce((total, item) => {
+            return total + item.book.price * item.quantity;
+        }, 0);
+    }
+
 }

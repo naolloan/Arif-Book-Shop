@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Delete, Body, UseGuards, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, UseGuards, Param, Req } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Book } from '../books/book.entity';
 import { User } from '../users/user.entity';
+import { RequestWithUser } from '../../common/interfaces/request-with-user.interface';
 
 @Controller('cart')
 @UseGuards(JwtAuthGuard)
@@ -31,5 +32,12 @@ export class CartController {
     @Delete('clear')
     async clearCart(@Body() user: User) {
         return this.cartService.clearCart(user);
+    }
+
+    @Get('total')
+    async getTotalPrice(@Req() request: RequestWithUser): Promise<{ totalPrice: number }> {
+        const userId = request.user.userId;
+        const totalPrice = await this.cartService.calculateTotalPrice(userId);
+        return { totalPrice };
     }
 }

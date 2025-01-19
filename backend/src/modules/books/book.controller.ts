@@ -28,10 +28,7 @@ export class BookController {
     @Post('upload/:id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
-    @Post('upload/:id')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Role('admin')
-    @UseInterceptors(FileInterceptor('file', {
+    @UseInterceptors(FileInterceptor('coverImage', {
         storage: diskStorage({
             destination: './uploads',
             filename: (req, file, callback) => {
@@ -77,7 +74,30 @@ export class BookController {
     async deleteBook(@Param('id') id: number): Promise<void> {
         return this.bookService.remove(id);
     }
-}
 
+    @Get('search')
+    async searchBooks(
+        @Query('search') search?: string,
+        @Query('genre') genre?: string | string[], // Accept single or comma-separated genres
+        @Query('minPrice') minPrice?: string,
+        @Query('maxPrice') maxPrice?: string,
+        @Query('sortBy') sortBy?: string,
+        @Query('order') order: 'ASC' | 'DESC' = 'ASC',
+    ) {
+        const min = minPrice ? parseFloat(minPrice) : undefined;
+        const max = maxPrice ? parseFloat(maxPrice) : undefined;
+        let genreList: string[] | undefined;
+
+        // Handle comma-separated genres
+
+        if (typeof genre === 'string') {
+            genreList = genre.split(',').map(g => g.trim());
+        } else if (Array.isArray(genre)) {
+            genreList = genre; // Already an array
+        }
+
+        return this.bookService.searchAndFilterBooks(search, genreList, min, max, sortBy, order);
+    }
+}
 
 
